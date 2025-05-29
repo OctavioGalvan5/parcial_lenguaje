@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Carrito de Compra - Libros</title>
+    <style>
+        /* Estilos básicos */
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        .libro, .carrito { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; }
+        .carrito { background: #f9f9f9; }
+        .error { color: red; }
+        button { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Tienda de Libros</h1>
+    <form id="formLibro">
+        <label>
+            Título:
+            <input type="text" id="titulo" required>
+        </label>
+        <br>
+        <label>
+            Autor:
+            <input type="text" id="autor" required>
+        </label>
+        <br>
+        <label>
+            Precio:
+            <input type="number" id="precio" min="1" required>
+        </label>
+        <br>
+        <button type="submit">Agregar libro</button>
+        <div id="error" class="error"></div>
+    </form>
+
+    <h2>Libros Disponibles</h2>
+    <div id="listaLibros"></div>
+
+    <h2>Carrito de Compra</h2>
+    <div id="carrito"></div>
+    <div id="total"></div>
+
+    <script>
+    // Lista de libros y carrito
+    let libros = [];
+    let carrito = [];
+
+    // Renderizar lista de libros disponibles
+    function renderLibros() {
+        let lista = document.getElementById('listaLibros');
+        lista.innerHTML = '';
+        if (libros.length === 0) {
+            lista.innerHTML = '<em>No hay libros agregados.</em>';
+        } else {
+            libros.forEach(function(libro, i) {
+                let div = document.createElement('div');
+                div.className = 'libro';
+                div.innerHTML = `<strong>${libro.titulo}</strong> de ${libro.autor} - $${libro.precio}
+                <button onclick="agregarAlCarrito(${i})">Agregar al carrito</button>`;
+                lista.appendChild(div);
+            });
+        }
+    }
+
+    // Renderizar carrito de compra
+    function renderCarrito() {
+        let carritoDiv = document.getElementById('carrito');
+        carritoDiv.innerHTML = '';
+        if (carrito.length === 0) {
+            carritoDiv.innerHTML = '<em>El carrito está vacío.</em>';
+        } else {
+            carrito.forEach(function(libro, idx) {
+                let div = document.createElement('div');
+                div.className = 'libro';
+                div.innerHTML = `<strong>${libro.titulo}</strong> de ${libro.autor} - $${libro.precio}
+                <button onclick="eliminarLibro(${idx})">Eliminar</button>`;
+                carritoDiv.appendChild(div);
+            });
+        }
+        let total = carrito.reduce(function(sum, l) { return sum + l.precio; }, 0);
+        document.getElementById('total').textContent = 'Total: $' + total;
+    }
+
+    // Agregar libro al carrito
+    function agregarAlCarrito(i) {
+        carrito.push(libros[i]);
+        renderCarrito();
+    }
+
+    // Eliminar libro del carrito
+    function eliminarLibro(idx) {
+        carrito.splice(idx, 1);
+        renderCarrito();
+    }
+
+    // Manejar envío del formulario para agregar un libro
+    document.getElementById('formLibro').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let titulo = document.getElementById('titulo').value.trim();
+        let autor = document.getElementById('autor').value.trim();
+        let precio = parseFloat(document.getElementById('precio').value);
+
+        let error = '';
+        if (!titulo) error = 'El título es obligatorio.';
+        else if (!autor) error = 'El autor es obligatorio.';
+        else if (isNaN(precio) || precio <= 0) error = 'El precio debe ser mayor a 0.';
+
+        document.getElementById('error').textContent = error;
+        if (error) return;
+
+        libros.push({ titulo: titulo, autor: autor, precio: precio });
+        renderLibros();
+        this.reset();
+    });
+
+    // Hacer funciones globales para los botones
+    window.agregarAlCarrito = agregarAlCarrito;
+    window.eliminarLibro = eliminarLibro;
+
+    // Inicializar
+    renderLibros();
+    renderCarrito();
+    </script>
+</body>
+</html>
